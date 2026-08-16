@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>트럼프 계좌 성장 계산기 (E맘)</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js and Annotation Plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.1.2/dist/chartjs-plugin-annotation.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1><i class="fa-solid fa-piggy-bank"></i> 트럼프 계좌 성장 계산기 (E맘)</h1>
+        </header>
+
+        <main>
+            <!-- Global Settings Section -->
+            <section class="glass-panel global-settings" style="border-top: 4px solid #10b981;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(226, 232, 240, 1); margin-bottom: 20px; padding-bottom: 10px;">
+                    <h2 style="border: none; margin: 0; padding: 0;"><i class="fa-solid fa-earth-americas"></i> 고급 설정 (Advanced Settings)</h2>
+                    <label class="switch">
+                        <input type="checkbox" id="toggle-advanced" checked>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="settings-grid" id="advanced-settings-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; transition: opacity 0.3s ease;">
+                    
+                    <div class="slider-group" style="background: transparent; border: none; padding: 0;">
+                        <div class="slider-header-top">
+                            <label><i class="fa-solid fa-hourglass-end"></i> 목표 연령 (Target Age)</label>
+                            <span class="weight-value" style="background:#10b981;" id="val-target-age">18세</span>
+                        </div>
+                        <input type="range" id="slider-target-age" min="10" max="30" step="1" value="18">
+                        <p class="desc">자녀가 자금에 접근할 목표 연령을 설정하세요.</p>
+                    </div>
+
+                    <div class="slider-group" style="background: transparent; border: none; padding: 0;">
+                        <div class="slider-header-top">
+                            <label><i class="fa-solid fa-arrow-trend-up"></i> 인플레이션 (Inflation)</label>
+                            <span class="weight-value" style="background:#10b981;" id="val-inflation">3%</span>
+                        </div>
+                        <input type="range" id="slider-inflation" min="0" max="10" step="1" value="3">
+                        <p class="desc">물가 상승률을 반영해 미래의 '실제 구매력'을 계산합니다.</p>
+                    </div>
+
+                    <div class="input-group" style="margin-bottom: 0;">
+                        <label for="input-goal"><i class="fa-solid fa-bullseye"></i> 목표 금액 (Target Goal)</label>
+                        <input type="number" id="input-goal" value="100000" min="0" step="5000">
+                        <p class="desc">대학 등록금 등 최종 목표 금액을 설정하세요.</p>
+                    </div>
+
+                    <div class="toggle-group" style="display:flex; flex-direction:column; justify-content:center;">
+                        <label style="font-weight:600; margin-bottom:8px;"><i class="fa-solid fa-file-invoice-dollar"></i> 트럼프 계좌 세금 적용 (15%)</label>
+                        <label class="switch">
+                            <input type="checkbox" id="toggle-tax">
+                            <span class="slider round red"></span>
+                        </label>
+                        <p class="desc" style="margin-top:8px;">트럼프 계좌 수익금에 자본이득세 15%를 차감합니다.</p>
+                    </div>
+
+                </div>
+            </section>
+
+            <div class="two-column-grid">
+                <!-- Trump Account Column -->
+                <div class="account-col">
+                    <section class="glass-panel input-section" style="border-top: 4px solid #3b82f6;">
+                        <h2>트럼프 아기 계좌 (Trump)</h2>
+                        
+                        <div class="input-group">
+                            <label for="birth-year"><i class="fa-solid fa-calendar-days"></i> 출생 연도</label>
+                            <input type="number" id="birth-year" value="2025" min="2000" max="2100">
+                            <p class="desc">2025년 이후 출생아는 기본금 $1,000로 시작합니다.</p>
+                        </div>
+
+                        <div class="slider-group" style="margin-bottom: 25px;">
+                            <div class="slider-header-top">
+                                <label><i class="fa-solid fa-hand-holding-dollar"></i> 연간 납입액</label>
+                                <span class="weight-value" id="val-contribution">$1,200/년</span>
+                            </div>
+                            <input type="range" id="slider-contribution" min="0" max="10000" step="100" value="1200">
+                            <p class="desc">매년 추가 납입금 입력해 주세요.</p>
+                        </div>
+
+                        <div class="slider-group">
+                            <div class="slider-header-top">
+                                <label><i class="fa-solid fa-chart-line"></i> 연평균 수익률</label>
+                                <span class="weight-value" id="val-rate">7%</span>
+                            </div>
+                            <input type="range" id="slider-rate" min="0" max="15" step="1" value="7">
+                            <p class="desc">예상 연평균 복리 수익률을 설정하세요.</p>
+                        </div>
+
+                        <div class="summary-cards" style="margin-top: 30px; margin-bottom: 0;">
+                            <div class="card">
+                                <div class="card-title">기본 시작 금액</div>
+                                <div class="card-value" id="base-amount">$1,000</div>
+                            </div>
+                            <div class="card">
+                                <div class="card-title">18세 최종 잔액</div>
+                                <div class="card-value highlight" id="final-balance">$0</div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- 529 Plan Column -->
+                <div class="account-col">
+                    <section class="glass-panel input-section" style="border-top: 4px solid #8b5cf6;">
+                        <h2>529 대학 학자금 저축 (529 Plan)</h2>
+                        
+                        <div class="input-group">
+                            <label for="base-529"><i class="fa-solid fa-piggy-bank"></i> 초기 납입금 (Initial Deposit)</label>
+                            <input type="number" id="base-529" value="0" min="0" step="100">
+                            <p class="desc">529 플랜의 초기 투자 금액을 입력하세요.</p>
+                        </div>
+
+                        <div class="slider-group purple" style="margin-bottom: 25px;">
+                            <div class="slider-header-top">
+                                <label><i class="fa-solid fa-hand-holding-dollar"></i> 연간 납입액</label>
+                                <span class="weight-value purple" id="val-contribution-529">$1,200/년</span>
+                            </div>
+                            <input type="range" id="slider-contribution-529" min="0" max="10000" step="100" value="1200">
+                            <p class="desc">매년 추가 납입금 입력해 주세요.</p>
+                        </div>
+
+                        <div class="slider-group purple">
+                            <div class="slider-header-top">
+                                <label><i class="fa-solid fa-chart-line"></i> 연평균 수익률</label>
+                                <span class="weight-value purple" id="val-rate-529">7%</span>
+                            </div>
+                            <input type="range" id="slider-rate-529" min="0" max="15" step="1" value="7">
+                            <p class="desc">예상 연평균 복리 수익률을 설정하세요.</p>
+                        </div>
+
+                        <div class="summary-cards" style="margin-top: 30px; margin-bottom: 0;">
+                            <div class="card">
+                                <div class="card-title">초기 납입금</div>
+                                <div class="card-value" id="base-amount-529">$0</div>
+                            </div>
+                            <div class="card">
+                                <div class="card-title">18세 최종 잔액</div>
+                                <div class="card-value highlight" id="final-balance-529" style="color: #8b5cf6; text-shadow: 0 0 15px rgba(139, 92, 246, 0.4);">$0</div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- Chart Section -->
+            <section class="glass-panel results-section">
+                <h2><i class="fa-solid fa-chart-area"></i> 성장 비교 차트 (목표 연령 기준)</h2>
+                <div class="two-column-grid">
+                    <div>
+                        <h3 style="text-align: center; margin-bottom: 10px; font-size: 1.1rem; color: #3b82f6;">트럼프 아기 계좌</h3>
+                        <div class="chart-container">
+                            <canvas id="growthChartTrump"></canvas>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 style="text-align: center; margin-bottom: 10px; font-size: 1.1rem; color: #8b5cf6;">529 저축 플랜</h3>
+                        <div class="chart-container">
+                            <canvas id="growthChart529"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Smart Insights Section -->
+            <section class="glass-panel insights-section" style="border-top: 4px solid #f59e0b; background: rgba(245, 158, 11, 0.1);">
+                <h2 style="color: #d97706; border-bottom-color: rgba(245, 158, 11, 0.3);"><i class="fa-solid fa-lightbulb"></i> 자동 분석 (Smart Insights)</h2>
+                <p id="smart-insight-text" style="font-size: 1.1rem; line-height: 1.6; font-weight: 600;">데이터를 분석 중입니다...</p>
+            </section>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
